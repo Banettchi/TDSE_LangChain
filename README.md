@@ -106,6 +106,10 @@ GOOGLE_API_KEY=tu-clave-de-google
    ```
 La respuesta se imprime directamente en consola.
 
+## Evidencia de Ejecución
+Ejemplo de salida generada:
+<img width="1910" height="991" alt="image" src="https://github.com/user-attachments/assets/23fd8160-2c38-4186-a19d-a74ba721f7aa" />
+
 
 ## Conceptos Demostrados
 - Inicialización de un LLM externo (Google Gemini) en LangChain.
