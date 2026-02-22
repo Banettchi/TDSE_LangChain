@@ -1,59 +1,129 @@
-# Laboratorio de Cadena LLM con LangChain
+# Cadena LLM Básica con LangChain y Google Gemini
 
-Este repositorio contiene el código y la documentación para el tutorial básico de la cadena LLM de LangChain, parte del laboratorio "Introducción a la Creación de RAGs (Generadores Aumentados por Recuperación) con OpenAI".
+## Introducción
+Este proyecto lo desarrollé para entender de forma práctica cómo funciona una **LLM Chain** en LangChain conectada a un modelo real. La idea no era construir algo complejo, sino comprender bien el flujo básico:
+
+- Cómo se inicializa un modelo de lenguaje (LLM).
+- Cómo se estructura y envía un prompt usando plantillas.
+- Cómo se recibe y procesa la respuesta del modelo.
+
+Integré **Google Gemini (gemini-2.5-flash)** como proveedor del modelo, lo que me permitió ejecutar el proyecto sin costos gracias a su API gratuita. Me enfoqué en que el código fuera claro, bien comentado y que demostrara los conceptos fundamentales de LangChain: `ChatPromptTemplate`, `ChatGoogleGenerativeAI`, y `StrOutputParser`, encadenados con **LCEL (LangChain Expression Language)**.
 
 ## Arquitectura del Proyecto
+El flujo del proyecto es el siguiente:
 
-Este proyecto simple demuestra los componentes fundamentales de LangChain:
-1.  **ChatOpenAI**: Un envoltorio para un Modelo de Lenguaje Grande (LLM) que permite la interacción programática con los modelos de OpenAI (específicamente `gpt-3.5-turbo`).
-2.  **ChatPromptTemplate**: Una plantilla de prompt genérica utilizada para estructurar las entradas para el LLM. Ayuda a manejar el contexto y las variables (como instrucciones específicas y entradas del usuario).
-3.  **StrOutputParser**: Un analizador que extrae automáticamente el contenido de texto de los objetos de respuesta estructurados devueltos por ChatOpenAI.
-4.  **LCEL (LangChain Expression Language)**: El mecanismo de tubería (`|`) para conectar prompts, modelos y analizadores en cadenas.
+```
+Usuario (prompt)
+  → LangChain (ChatPromptTemplate)
+    → Google Gemini (gemini-2.5-flash)
+      → Generación de texto
+        → StrOutputParser
+          → Respuesta impresa en consola
+```
 
-## Requisitos Previos
-* Python 3.8+
-* Una clave API de OpenAI activa.
+Más detallado:
 
-## Instrucciones de Instalación
+1. Se carga la API key de Google desde un archivo `.env`.
+2. Se inicializa el modelo con `ChatGoogleGenerativeAI`.
+3. Se crea una plantilla de prompt con instrucciones del sistema y la consulta del usuario.
+4. Se construye la cadena usando el operador `|` de LCEL.
+5. El modelo genera respuestas basadas en el input.
+6. Se imprime el contenido generado en consola.
 
-1.  **Abre el directorio**: Asegúrate de estar en el directorio raíz de este repositorio (donde se encuentran este `README.md` y `requirements.txt`).
-2.  **Crear un entorno virtual (opcional pero recomendado)**:
-    ```bash
-    python -m venv venv
-    # En Windows
-    .\venv\Scripts\activate
-    # En macOS/Linux
-    source venv/bin/activate
-    ```
-3.  **Instalar dependencias**:
-    ```bash
-    pip install -r requirements.txt
-    ```
-4.  **Configurar la clave de API**:
-    Crea un archivo llamado `.env` en la raíz del directorio y añade tu clave API de OpenAI de esta manera:
-    ```env
-    OPENAI_API_KEY="tu-clave-sk-...."
-    ```
+Este patrón es la base sobre la cual luego se pueden construir:
+- Chains más complejas
+- Agentes
+- Sistemas RAG
+- Pipelines con memoria
 
-## Cómo Ejecutar
+## Archivo Principal
 
-Ejecuta el script principal:
+**main.py**
+
+```python
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+
+def main():
+    model = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.7)
+
+    prompt_template = ChatPromptTemplate.from_messages([
+        ("system", "Eres un asistente educativo experto..."),
+        ("user", "{text}")
+    ])
+
+    parser = StrOutputParser()
+    chain = prompt_template | model | parser
+
+    respuesta = chain.invoke({
+        "text": "Explica qué es LangChain y sus componentes principales."
+    })
+    print(respuesta)
+
+if __name__ == "__main__":
+    main()
+```
+
+## Requisitos
+- Python 3.x
+- `langchain`
+- `langchain-google-genai`
+- `python-dotenv`
+
+Instalación:
 ```bash
-python main.py
+pip install -r requirements.txt
 ```
 
-## Ejemplo de Salida
+## Variables de Entorno
+Archivo `.env`:
+```env
+GOOGLE_API_KEY=tu-clave-de-google
 ```
---- Tutorial Básico de Cadena LLM con LangChain ---
+> El proyecto no funciona sin esta variable correctamente configurada. Obtén tu clave gratuita en [Google AI Studio](https://aistudio.google.com/apikey).
 
-[1] Inicializando ChatOpenAI...
-[2] Creando Plantilla de Prompt...
-[3] Creando Analizador de Salida...
-[4] Construyendo la Cadena (Prompt -> Modelo -> Analizador)...
+## Cómo lo corrí en mi máquina (Windows)
+1. Creé un entorno virtual:
+   ```bash
+   python -m venv .venv
+   ```
+2. Activé el entorno:
+   ```bash
+   .venv\Scripts\Activate.ps1
+   ```
+3. Instalé dependencias:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Ejecuté:
+   ```bash
+   py main.py
+   ```
+La respuesta se imprime directamente en consola.
 
---- Invocando la Cadena ---
-Entrada: '¡Hola! ¿Cómo estás hoy?' (Traduciendo de Español a Inglés)
+## Evidencia de Ejecución
+Ejemplo de salida generada:
 
-[Resultado]:
-Hello! How are you today?
-```
+![Evidencia de ejecución](img/evidencia.png)
+
+## Conceptos Demostrados
+- Inicialización de un LLM externo (Google Gemini) en LangChain.
+- Uso de variables de entorno para credenciales.
+- Creación de plantillas de prompt con `ChatPromptTemplate`.
+- Flujo básico de invocación (`invoke`).
+- Encadenamiento de componentes con **LCEL** (operador `|`).
+- Uso de `StrOutputParser` para procesar la respuesta del modelo.
+- Integración entre framework (LangChain) y proveedor externo (Google Gemini).
+
+## Conclusión
+- **Arquitectura**: Aunque es un ejemplo simple, muestra claramente la separación entre aplicación, framework y modelo.
+- **Integración**: LangChain abstrae la complejidad del proveedor; cambiar de modelo solo requiere modificar parámetros.
+- **Base para RAG**: Este flujo es exactamente el que luego se amplía al agregar un componente de recuperación (retriever + vector store).
+- **Simplicidad**: Mantener el código pequeño permitió entender cada parte sin ocultar lógica detrás de librerías complejas.
+- **Sin costos**: Usar Google Gemini permite ejecutar el proyecto sin necesidad de una suscripción de pago.
