@@ -86,7 +86,6 @@ Archivo `.env`:
 ```env
 GOOGLE_API_KEY=tu-clave-de-google
 ```
-> El proyecto no funciona sin esta variable correctamente configurada. Obtén tu clave gratuita en [Google AI Studio](https://aistudio.google.com/apikey).
 
 ## Cómo lo corrí en mi máquina (Windows)
 1. Creé un entorno virtual:
@@ -107,10 +106,6 @@ GOOGLE_API_KEY=tu-clave-de-google
    ```
 La respuesta se imprime directamente en consola.
 
-## Evidencia de Ejecución
-Ejemplo de salida generada:
-
-![Evidencia de ejecución](img/evidencia.png)
 
 ## Conceptos Demostrados
 - Inicialización de un LLM externo (Google Gemini) en LangChain.
